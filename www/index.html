@@ -276,7 +276,53 @@
                         ,ovbArr:[]
                     };
 
+                 try
+                 {
+                    var myDate = startDate;
+                    var startVolume = 0;
+                    var count = 0;
+                    var lastClose = 0;
+                    var startOvb = 0;
+                   var lastClose = 0;
+                    while (myDate <= endDate) {
+                        ret.volumeArr.push(parseFloat(keyData[myDate].volume));
+                        if(count == 0)
+                        {
+                            startOvb = parseFloat(keyData[myDate].volume);
+                        }
+                        else
+                        {
+                            if(lastClose == 0)
+                                lastClose = parseFloat(keyData[myDate].open);
+                            var close = parseFloat(keyData[myDate].close);
 
+                            if(close > lastClose)
+                            {
+                                startOvb = startOvb + parseFloat(keyData[myDate].volume);
+                            }
+                            else if(lastClose > close)
+                            {
+                                 startOvb = startOvb - parseFloat(keyData[myDate].volume);
+                            }
+
+                            
+                            
+                        }
+                        lastClose = parseFloat(keyData[myDate].close);
+                        ret.ovbArr.push(startOvb);
+
+                        startVolume = startVolume + parseFloat(keyData[myDate].volume);
+                        count = count +1;
+
+                        myDate = dateService.addMinuteToDate(myDate, 1);
+                    }
+
+                    ret.avgVolume = startVolume/count;
+                 }
+                 catch(Ex)
+                 {
+                     console.error(ex);
+                 }
 
 
                     return ret;
@@ -791,6 +837,17 @@
                             Low : {{item.low | number:5}} %<br>
                             Trade : {{item.trade}}<br>
                             Avg Volume : {{item.volumeObj.avgVolume | number:2}}<br/>
+                            vol : 
+                            <span ng-repeat="vol in item.volumeObj.volumeArr track by $index">
+                                {{vol}} ,
+                            </span>
+                            <br/>
+                            ovb : 
+                            <span ng-repeat="ovb in item.volumeObj.ovbArr track by $index">
+                                {{ovb}} ,
+                            </span>
+
+                        
                         </li>
                     </ul>
                 </div>
@@ -845,6 +902,28 @@
                          <tr>
                             <td>Avg Volume</td>
                             <td> {{body.bindModel.volumeObj.avgVolume | number:2}} </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                vol
+                            </td>
+                            <td>
+                                 <span ng-repeat="vol in body.bindModel.volumeObj.volumeArr track by $index">
+                                {{vol}} ,
+                            </span>
+                            </td>
+                           
+                        </tr>
+                        <tr>
+                            <td>
+                                ovb
+                            </td>
+                             <td >
+                                
+                            <span ng-repeat="ovb in body.bindModel.volumeObj.ovbArr track by $index">
+                                {{ovb}} ,
+                            </span>
+                            </td>
                         </tr>
                     </table>
 
