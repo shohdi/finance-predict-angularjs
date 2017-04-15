@@ -276,6 +276,23 @@
                         volumeArr:[]
                         ,avgVolume:0
                         ,ovbArr:[]
+                        ,closesArr:[]
+                        ,closesChart:{
+                            data:[[]],
+                            series:['close']
+                            ,labels:[]
+                            ,dataset:[{ yAxisID: 'y-axis-1' }]
+                            ,options:{
+    scales: {
+      yAxes: [
+        {
+          id: 'y-axis-1',
+          type: 'linear',
+          display: true,
+          position: 'left'
+        }]}
+                        }
+                    }
                         ,volumeChart:{
                             data:[[]],
                             series:['volumes']
@@ -323,6 +340,8 @@
                     while (myDate <= endDate) {
                         ret.volumeArr.push(parseFloat(keyData[myDate].volume));
                         ret.volumeChart.labels.push(myDate.getMinutes().toString());
+                        ret.closesArr.push(parseFloat(keyData[myDate].close));
+                        ret.closesChart.labels.push(myDate.getMinutes().toString());
                         if(count == 0)
                         {
                             startOvb = parseFloat(keyData[myDate].volume);
@@ -359,6 +378,7 @@
 
                     ret.volumeChart.data = [ret.volumeArr];
                     ret.ovbChart.data = [ret.ovbArr];
+                    ret.closesChart.data=[ret.closesArr];
 
                  }
                  catch(Ex)
@@ -837,6 +857,19 @@
                         <label for="timeToMatch" lass="control-label">How many minutes match ?</label>
                         <input type="text" name="timeToMatch" ng-model="body.config.timeToMatch" class="form-control" required>
                     </div>
+
+                    <div class="form-group">
+
+                        <div class="btn-group">
+                            <label class="btn btn-default">
+                                <input type="checkbox" name="showGraph" id="showGraph" ng-model="body.config.showGraph">
+
+                                show graphs ?
+                            </label>
+                        </div>
+
+                    </div>
+
                     <div class="form-group">
 
                         <div class="btn-group">
@@ -891,6 +924,14 @@
                             Low : {{item.low | number:5}} %<br>
                             Trade : {{item.trade}}<br>
                             Avg Volume : {{item.volumeObj.avgVolume | number:2}}<br>
+                            <div ng-if="body.config.showGraph">
+                                 graph : 
+                            <canvas id="graphLine1" class="chart chart-line" chart-data="item.volumeObj.closesChart.data" chart-labels="item.volumeObj.closesChart.labels" chart-series="item.volumeObj.closesChart.series" chart-options="item.volumeObj.closesChart.options" chart-dataset-override="item.volumeObj.closesChart.dataset">
+</canvas>
+                            </div>
+                           
+
+                             <br/>
                             <div ng-if="body.config.showOvb">
                                 vol : 
                             
@@ -965,6 +1006,15 @@
                          <tr>
                             <td>Avg Volume</td>
                             <td> {{body.bindModel.volumeObj.avgVolume | number:2}} </td>
+                        </tr>
+                        <tr ng-if="body.config.showGraph">
+                            <td>
+                                graph
+                            </td>
+                            <td style="width:100%">
+                                 <canvas id="graphLine2" class="chart chart-line" chart-data="body.bindModel.volumeObj.closesChart.data" chart-labels="body.bindModel.volumeObj.closesChart.labels" chart-series="body.bindModel.volumeObj.closesChart.series" chart-options="body.bindModel.volumeObj.closesChart.options" chart-dataset-override="body.bindModel.volumeObj.closesChart.dataset">
+</canvas>
+                            </td>
                         </tr>
                         <tr ng-if="body.config.showOvb">
                             <td>
