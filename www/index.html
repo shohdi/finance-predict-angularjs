@@ -10,9 +10,11 @@
     <script src="Scripts/angular.js"></script>
     <script src="Scripts/angular-ui/ui-bootstrap.js"></script>
 
+    <script src="js/Chart.min.js"></script>
+     <script src="js/angular-chart.min.js"></script>
 
     <script type="text/javascript">
-        angular.module("financeApp", [])
+        angular.module("financeApp",  ['chart.js'])
         .value("urlFormat", 'http://chartapi.finance.yahoo.com/instrument/1.0/{StockName}/chartdata;type=quote;range=1d/json?callback=JSON_CALLBACK')
             .value("oneItemUrl", 'http://finance.yahoo.com/webservice/v1/symbols/{StockName}/quote?format=json&callback=JSON_CALLBACK')
             .constant("stockName", "{StockName}")
@@ -274,6 +276,40 @@
                         volumeArr:[]
                         ,avgVolume:0
                         ,ovbArr:[]
+                        ,volumeChart:{
+                            data:[[]],
+                            series:['volumes']
+                            ,labels:[]
+                            ,dataset:[{ yAxisID: 'y-axis-1' }]
+                            ,options:{
+    scales: {
+      yAxes: [
+        {
+          id: 'y-axis-1',
+          type: 'linear',
+          display: true,
+          position: 'left'
+        }]}
+                        }
+                    }
+
+,ovbChart:{
+                            data:[[]],
+                            labels:[],
+                            series:['ovb']
+                            ,dataset:[{ yAxisID: 'y-axis-1' }]
+                            ,options:{
+    scales: {
+      yAxes: [
+        {
+          id: 'y-axis-1',
+          type: 'linear',
+          display: true,
+          position: 'left'
+        }]}
+                        }
+                    }
+
                     };
 
                  try
@@ -286,6 +322,7 @@
                    var lastClose = 0;
                     while (myDate <= endDate) {
                         ret.volumeArr.push(parseFloat(keyData[myDate].volume));
+                        ret.volumeChart.labels.push(myDate.getMinutes().toString());
                         if(count == 0)
                         {
                             startOvb = parseFloat(keyData[myDate].volume);
@@ -310,6 +347,7 @@
                         }
                         lastClose = parseFloat(keyData[myDate].close);
                         ret.ovbArr.push(startOvb);
+                        ret.ovbChart.labels.push(myDate.getMinutes().toString());
 
                         startVolume = startVolume + parseFloat(keyData[myDate].volume);
                         count = count +1;
@@ -318,6 +356,10 @@
                     }
 
                     ret.avgVolume = startVolume/count;
+
+                    ret.volumeChart.data = [ret.volumeArr];
+                    ret.ovbChart.data = [ret.ovbArr];
+
                  }
                  catch(Ex)
                  {
@@ -807,6 +849,18 @@
 
                     </div>
 
+                    <div class="form-group">
+
+                        <div class="btn-group">
+                            <label class="btn btn-default">
+                                <input type="checkbox" name="showOvb" id="showOvb" ng-model="body.config.showOvb">
+
+                                show ovb graphs ?
+                            </label>
+                        </div>
+
+                    </div>
+
 
                     <div class="form-group">
                         <button class="btn btn-success" ng-disabled="!calculateForm.$valid" ng-click="body.showResult(body.config)">Calculate</button>
@@ -836,16 +890,25 @@
                             Equal : {{item.equal | number:5}} %<br>
                             Low : {{item.low | number:5}} %<br>
                             Trade : {{item.trade}}<br>
-                            Avg Volume : {{item.volumeObj.avgVolume | number:2}}<br/>
-                            vol : 
-                            <span ng-repeat="vol in item.volumeObj.volumeArr track by $index">
-                                {{vol}} ,
-                            </span>
-                            <br/>
+                            Avg Volume : {{item.volumeObj.avgVolume | number:2}}<br>
+                            <div ng-if="body.config.showOvb">
+                                vol : 
+                            
+                           
+
+
+<canvas id="volumeLine1" class="chart chart-bar" chart-data="item.volumeObj.volumeChart.data" chart-labels="item.volumeObj.volumeChart.labels" chart-series="item.volumeObj.volumeChart.series">
+</canvas>
+<br>
+
                             ovb : 
-                            <span ng-repeat="ovb in item.volumeObj.ovbArr track by $index">
-                                {{ovb}} ,
-                            </span>
+                            
+
+                            
+<canvas id="ovbLine1" class="chart chart-line" chart-data="item.volumeObj.ovbChart.data" chart-labels="item.volumeObj.ovbChart.labels" chart-series="item.volumeObj.ovbChart.series" chart-options="item.volumeObj.ovbChart.options" chart-dataset-override="item.volumeObj.ovbChart.dataset">
+</canvas>
+                            </div>
+                            
 
                         
                         </li>
@@ -903,26 +966,24 @@
                             <td>Avg Volume</td>
                             <td> {{body.bindModel.volumeObj.avgVolume | number:2}} </td>
                         </tr>
-                        <tr>
+                        <tr ng-if="body.config.showOvb">
                             <td>
                                 vol
                             </td>
-                            <td>
-                                 <span ng-repeat="vol in body.bindModel.volumeObj.volumeArr track by $index">
-                                {{vol}} ,
-                            </span>
+                            <td style="width:100%">
+                                <canvas id="volumeLine2" class="chart chart-bar" chart-data="body.bindModel.volumeObj.volumeChart.data" chart-labels="body.bindModel.volumeObj.volumeChart.labels" chart-series="body.bindModel.volumeObj.volumeChart.series">
+</canvas>
                             </td>
                            
                         </tr>
-                        <tr>
+                        <tr ng-if="body.config.showOvb">
                             <td>
                                 ovb
                             </td>
-                             <td >
+                             <td style="width:100%">
                                 
-                            <span ng-repeat="ovb in body.bindModel.volumeObj.ovbArr track by $index">
-                                {{ovb}} ,
-                            </span>
+                           <canvas id="ovbLine2" class="chart chart-line" chart-data="body.bindModel.volumeObj.ovbChart.data" chart-labels="body.bindModel.volumeObj.ovbChart.labels" chart-series="body.bindModel.volumeObj.ovbChart.series" chart-options="body.bindModel.volumeObj.ovbChart.options" chart-dataset-override="body.bindModel.volumeObj.ovbChart.dataset">
+</canvas>
                             </td>
                         </tr>
                     </table>
