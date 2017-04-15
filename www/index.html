@@ -267,6 +267,21 @@
                     return service.startAnalysisProcess(keydData, startDate, endDate, config, item);
                 };
 
+
+                service.calculateVolumes = function (keyData,startDate,endDate,config,item)
+                {
+                    var ret = {
+                        volumeArr:[]
+                        ,avgVolume:0
+                        ,ovbArr:[]
+                    };
+
+
+
+
+                    return ret;
+                };
+
                 service.startAnalysisProcess = function (keyData, startDate, endDate, config, item) {
                     var high = 0;
                     var equal = 0;
@@ -278,6 +293,13 @@
                     var myStartDate = startDate;
                     var myEndDate = dateService.getEndOfDate(myStartDate, config.minutes(), config.endDate15);
                     var myAllData = [];
+
+                   
+
+                   var volumeObj = service.calculateVolumes(keyData,startDate,endDate,config,item);
+
+                   
+
                     while (myEndDate <= endDate) {
                         try {
                             if (!keyData[myEndDate].isEnd) {
@@ -330,6 +352,7 @@
                     var bindModel = {};
                     //get name here
                     bindModel.symbol = item + ' - ' + service.getStockName(item);
+                    bindModel.volumeObj = volumeObj;
                     console.log(bindModel.symbol);
                     if (count > 0) {
                         avgDown = avgDown / low;
@@ -434,6 +457,7 @@
                 , low: bindModel.low
                 , startDate: bindModel.startDate
                 , trade: ''
+                ,volumeObj:bindModel.volumeObj
                         };
 
 
@@ -766,6 +790,7 @@
                             Equal : {{item.equal | number:5}} %<br>
                             Low : {{item.low | number:5}} %<br>
                             Trade : {{item.trade}}<br>
+                            Avg Volume : {{item.volumeObj.avgVolume | number:2}}<br/>
                         </li>
                     </ul>
                 </div>
@@ -816,6 +841,10 @@
                         <tr>
                             <td>equality percentage</td>
                             <td> {{body.bindModel.equal | number:2}} %</td>
+                        </tr>
+                         <tr>
+                            <td>Avg Volume</td>
+                            <td> {{body.bindModel.volumeObj.avgVolume | number:2}} </td>
                         </tr>
                     </table>
 
