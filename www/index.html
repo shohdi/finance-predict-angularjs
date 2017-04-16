@@ -277,6 +277,7 @@
                         ,avgVolume:0
                         ,ovbArr:[]
                         ,closesArr:[]
+                        ,enhanceOvbArr:[]
                         ,closesChart:{
                             data:[[]],
                             series:['close']
@@ -327,6 +328,24 @@
                         }
                     }
 
+
+                    ,enhanceOvbChart:{
+                            data:[[]],
+                            labels:[],
+                            series:['enhance_ovb']
+                            ,dataset:[{ yAxisID: 'y-axis-1' }]
+                            ,options:{
+    scales: {
+      yAxes: [
+        {
+          id: 'y-axis-1',
+          type: 'linear',
+          display: true,
+          position: 'left'
+        }]}
+                        }
+                    }
+
                     };
 
                  try
@@ -336,6 +355,7 @@
                     var count = 0;
                     var lastClose = 0;
                     var startOvb = 0;
+                    var startEnhance = 0;
                    var lastClose = 0;
                     while (myDate <= endDate) {
                         if (parseFloat(keyData[myDate].volume) == 0)
@@ -350,6 +370,7 @@
                         if(count == 0)
                         {
                             startOvb = parseFloat(keyData[myDate].volume);
+                            startEnhance = startOvb;
                         }
                         else
                         {
@@ -367,11 +388,35 @@
                             }
 
                             
+                            //enhance ovb
+                            var high = parseFloat(keyData[myDate].high);
+                            var low = parseFloat(keyData[myDate].low);
+                            var open = lastClose;
+                            var volume = parseFloat(keyData[myDate].volume);
+
+                            var mid = (high + low)/2;
+                            if(close > mid)
+                            {
+                                startEnhance = startEnhance + volume;
+                            }
+                            else if (mid > close)
+                            {
+                                startEnhance = startEnhance - volume;
+                            }
+
                             
                         }
+
+
+
+
+
                         lastClose = parseFloat(keyData[myDate].close);
                         ret.ovbArr.push(startOvb);
                         ret.ovbChart.labels.push(myDate.getMinutes().toString());
+
+                        ret.enhanceOvbArr.push(startEnhance);
+                        ret.enhanceOvbChart.labels.push(myDate.getMinutes().toString());
 
                         startVolume = startVolume + parseFloat(keyData[myDate].volume);
                         count = count +1;
@@ -384,6 +429,7 @@
                     ret.volumeChart.data = [ret.volumeArr];
                     ret.ovbChart.data = [ret.ovbArr];
                     ret.closesChart.data=[ret.closesArr];
+                    ret.enhanceOvbChart.data = [ret.enhanceOvbArr];
 
                  }
                  catch(Ex)
@@ -910,6 +956,19 @@
 
                     </div>
 
+<div class="form-group">
+
+                        <div class="btn-group">
+                            <label class="btn btn-default">
+                                <input type="checkbox" name="showEnhanceOvb" id="showEnhanceOvb" ng-model="body.config.showEOvb">
+
+                                show enhanced ovb graph ?
+                            </label>
+                        </div>
+
+                    </div>
+
+
                     <div class="form-group">
 
                         <div class="btn-group">
@@ -984,6 +1043,18 @@
 </canvas>
                             </div>
                             
+                            <br>
+                             <div ng-if="body.config.showEOvb">
+                               
+
+
+                            Enhanced ovb : 
+                            
+
+                            
+<canvas id="eovbLine1" class="chart chart-line" chart-data="item.volumeObj.enhanceOvbChart.data" chart-labels="item.volumeObj.enhanceOvbChart.labels" chart-series="item.volumeObj.enhanceOvbChart.series" chart-options="item.volumeObj.enhanceOvbChart.options" chart-dataset-override="item.volumeObj.enhanceOvbChart.dataset">
+</canvas>
+                            </div>
 
                         
                         </li>
@@ -1070,6 +1141,19 @@
 </canvas>
                             </td>
                         </tr>
+
+ <tr ng-if="body.config.showEOvb">
+                            <td>
+                                Enhanced ovb
+                            </td>
+                             <td style="width:100%">
+                                
+                           <canvas id="eovbLine2" class="chart chart-line" chart-data="body.bindModel.volumeObj.enhanceOvbChart.data" chart-labels="body.bindModel.volumeObj.enhanceOvbChart.labels" chart-series="body.bindModel.volumeObj.enhanceOvbChart.series" chart-options="body.bindModel.volumeObj.enhanceOvbChart.options" chart-dataset-override="body.bindModel.volumeObj.enhanceOvbChart.dataset">
+</canvas>
+                            </td>
+                        </tr>
+
+                        
                     </table>
 
                     <hr>
