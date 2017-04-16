@@ -338,10 +338,15 @@
                     var startOvb = 0;
                    var lastClose = 0;
                     while (myDate <= endDate) {
+                        if (parseFloat(keyData[myDate].volume) == 0)
+                        {
+                            keyData[myDate].volume=1;
+                        }
                         ret.volumeArr.push(parseFloat(keyData[myDate].volume));
                         ret.volumeChart.labels.push(myDate.getMinutes().toString());
                         ret.closesArr.push(parseFloat(keyData[myDate].close));
                         ret.closesChart.labels.push(myDate.getMinutes().toString());
+                       
                         if(count == 0)
                         {
                             startOvb = parseFloat(keyData[myDate].volume);
