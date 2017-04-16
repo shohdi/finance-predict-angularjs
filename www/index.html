@@ -523,6 +523,7 @@
                     , endDate15: false
                     , timeToMatch: 0
                     , lastSymbol: ''
+                    , alertPercentage:70
                 };
 
                 body.notifyArray = [];
@@ -571,17 +572,20 @@
 
 
                         if (isLastUp
-                            && (bindModel.high >= 70)) {
+                            && (bindModel.high >= body.config.alertPercentage && bindModel.high >= bindModel.low)) {
                             retObj.trade = 'high';
-                            body.sendNotif('Trade up ' + retObj.symbol);
+                            if(body.config.alertPercentage > 0)
+                                body.sendNotif('Trade up ' + retObj.symbol);
                             retObj.number = retObj.high;
                             body.notifyArray.push(retObj);
                         }
                         else if (isLastDown
-                            && (bindModel.low >= 70)) {
+                            && (bindModel.low >= body.config.alertPercentage && bindModel.low > bindModel.high)) {
                             retObj.trade = 'down';
-                            body.sendNotif('Trade down ' + retObj.symbol);
+                            if(body.config.alertPercentage > 0)
+                                body.sendNotif('Trade down ' + retObj.symbol);
                             retObj.number = retObj.low;
+                            
                             body.notifyArray.push(retObj);
                         }
                     }
@@ -856,6 +860,13 @@
                     <div class="form-group">
                         <label for="timeToMatch" lass="control-label">How many minutes match ?</label>
                         <input type="text" name="timeToMatch" ng-model="body.config.timeToMatch" class="form-control" required>
+                    </div>
+
+                     <div class="form-group">
+
+                        <label for="alertPercentage" lass="control-label">Percentage to match</label>
+                        <input type="text" name="alertPercentage" ng-model="body.config.alertPercentage" class="form-control" required>
+
                     </div>
 
                     <div class="form-group">
