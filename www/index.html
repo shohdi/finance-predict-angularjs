@@ -885,9 +885,9 @@
 
                         <div class="btn-group">
                             <label class="btn btn-default">
-                                <input type="checkbox" name="endDate15" id="endDate15" ng-model="body.config.endDate15">
+                                <input type="checkbox" name="showVol" id="showVol" ng-model="body.config.showVolume">
 
-                                Normalize to 15 ?
+                                show volume graph ?
                             </label>
                         </div>
 
@@ -899,7 +899,19 @@
                             <label class="btn btn-default">
                                 <input type="checkbox" name="showOvb" id="showOvb" ng-model="body.config.showOvb">
 
-                                show ovb graphs ?
+                                show ovb graph ?
+                            </label>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <div class="btn-group">
+                            <label class="btn btn-default">
+                                <input type="checkbox" name="endDate15" id="endDate15" ng-model="body.config.endDate15">
+
+                                Normalize to 15 ?
                             </label>
                         </div>
 
@@ -943,15 +955,21 @@
                            
 
                              <br>
-                            <div ng-if="body.config.showOvb">
-                                vol : 
+
+<div ng-if="body.config.showVolume">
+     vol : 
                             
                            
 
 
 <canvas id="volumeLine1" class="chart chart-bar" chart-data="item.volumeObj.volumeChart.data" chart-labels="item.volumeObj.volumeChart.labels" chart-series="item.volumeObj.volumeChart.series">
 </canvas>
+</div>
 <br>
+
+                            <div ng-if="body.config.showOvb">
+                               
+
 
                             ovb : 
                             
@@ -1027,7 +1045,7 @@
 </canvas>
                             </td>
                         </tr>
-                        <tr ng-if="body.config.showOvb">
+                        <tr ng-if="body.config.showVolume">
                             <td>
                                 vol
                             </td>
