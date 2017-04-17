@@ -270,6 +270,60 @@
                 };
 
 
+                service.calculateAverageArrays = function(keydData,startDate,endDate,config,item)
+                {
+                    var ret = {
+                          avgArr:[]
+                          ,maxArr:[]
+                          ,minArr:[]
+                          ,dayMax:0
+                          ,dayMin:0
+                    };
+
+                    var myDate = keydData.first.keyDate;
+
+                    var avg = 0;
+                    var count = 0;
+
+                    while(myDate <= endDate)
+                    {
+                        var close = parseFloat(keydData[myDate].close);
+
+                        avg = avg + close;
+                        count = count +1;
+                        
+                        if(ret.dayMax < close)
+                        {
+                            ret.dayMax = close;
+                        }
+
+                        if(ret.dayMin == 0 || ret.dayMin > close)
+                        {
+                            ret.dayMin = close;
+                        }
+
+
+                        if(myDate >= startDate)
+                        {
+                            //we add array values;
+                            var currentAvg = avg/count;
+                            var currentMax = currentAvg + ((ret.dayMax - currentAvg)/2);
+                            var currentMin = currentAvg - ((currentAvg-ret.dayMin)/2);
+                            ret.minArr.push(currentMin);
+                            ret.avgArr.push(currentAvg);
+                            ret.maxArr.push(currentMax);
+                        }
+
+
+                        myDate = dateService.addMinuteToDate(myDate, 1);
+                    }
+
+
+
+                    return ret;
+                }
+
+
                 service.calculateVolumes = function (keyData,startDate,endDate,config,item)
                 {
                     var ret = {
@@ -428,7 +482,17 @@
 
                     ret.volumeChart.data = [ret.volumeArr];
                     ret.ovbChart.data = [ret.ovbArr];
-                    ret.closesChart.data=[ret.closesArr];
+                    if(config.showTodayAverage)
+                    {
+                       
+                        var averageRet = service.calculateAverageArrays(keyData,startDate,endDate,config,item);
+                        ret.closesChart.data=[ret.closesArr,averageRet.avgArr,averageRet.maxArr,averageRet.minArr];
+                    }
+                    else
+                    {
+                        ret.closesChart.data=[ret.closesArr];
+                    }
+                    
                     ret.enhanceOvbChart.data = [ret.enhanceOvbArr];
 
                  }
@@ -578,6 +642,24 @@
                 };
 
                 body.notifyArray = [];
+
+                body.setShowGraph = function()
+                {
+                    console.log(body.config.showTodayAverage);
+                    if(body.config.showTodayAverage)
+                    {
+                        body.config.showGraph = true;
+                    }
+
+                };
+
+                body.setShowAverage = function()
+                {
+                    if(!body.config.showGraph)
+                    {
+                        body.config.showTodayAverage = false;
+                    }
+                }
 
                 body.showResult = function (config) {
                     //body.clear();
@@ -920,21 +1002,31 @@
 
                     </div>
 
-                    <div class="form-group">
+                    <style>
+                        .my-check-containter > .btn-group
+                        {
+                            margin:5px;
+                        }
+                    </style>
+                    <div class="my-check-containter form-group">
 
                         <div class="btn-group">
                             <label class="btn btn-default">
-                                <input type="checkbox" name="showGraph" id="showGraph" ng-model="body.config.showGraph">
+                                <input type="checkbox" name="showGraph" id="showGraph" ng-model="body.config.showGraph" ng-change="body.setShowAverage();">
 
                                 show graphs ?
                             </label>
                         </div>
 
-                    </div>
+                         <div class="btn-group">
+                            <label class="btn btn-default">
+                                <input type="checkbox" name="showTodayAverage" id="showTodayAverage" ng-model="body.config.showTodayAverage" ng-change="body.setShowGraph();">
 
-                    <div class="form-group">
+                                show average and today divergance ?
+                            </label>
+                        </div>
 
-                        <div class="btn-group">
+                         <div class="btn-group">
                             <label class="btn btn-default">
                                 <input type="checkbox" name="showVol" id="showVol" ng-model="body.config.showVolume">
 
@@ -942,11 +1034,7 @@
                             </label>
                         </div>
 
-                    </div>
-
-                    <div class="form-group">
-
-                        <div class="btn-group">
+                         <div class="btn-group">
                             <label class="btn btn-default">
                                 <input type="checkbox" name="showOvb" id="showOvb" ng-model="body.config.showOvb">
 
@@ -954,11 +1042,7 @@
                             </label>
                         </div>
 
-                    </div>
-
-<div class="form-group">
-
-                        <div class="btn-group">
+                         <div class="btn-group">
                             <label class="btn btn-default">
                                 <input type="checkbox" name="showEnhanceOvb" id="showEnhanceOvb" ng-model="body.config.showEOvb">
 
@@ -966,12 +1050,7 @@
                             </label>
                         </div>
 
-                    </div>
-
-
-                    <div class="form-group">
-
-                        <div class="btn-group">
+                         <div class="btn-group">
                             <label class="btn btn-default">
                                 <input type="checkbox" name="endDate15" id="endDate15" ng-model="body.config.endDate15">
 
@@ -980,6 +1059,9 @@
                         </div>
 
                     </div>
+
+ 
+                   
 
 
                     <div class="form-group">
