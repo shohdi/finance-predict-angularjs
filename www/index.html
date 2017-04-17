@@ -680,14 +680,31 @@
                         var isLastUp = bindModel.orderedData.length > (body.config.timeToMatch - 1);
                         if (isLastUp) {
                             for (var i = 0; i < body.config.timeToMatch; i++) {
-                                isLastUp = isLastUp && bindModel.orderedData[i].myhigh > bindModel.orderedData[i].mylow
+
+                                if(body.config.matchReversal)
+                                {
+                                    isLastUp = isLastUp && bindModel.orderedData[i].myhigh < bindModel.orderedData[i].mylow;
+                                }
+                                else
+                                {
+                                    isLastUp = isLastUp && bindModel.orderedData[i].myhigh > bindModel.orderedData[i].mylow;
+                                }
+
+                                
                             }
                         }
 
                         var isLastDown = bindModel.orderedData.length > (body.config.timeToMatch - 1);
                         if (isLastDown) {
                             for (var i = 0; i < body.config.timeToMatch; i++) {
-                                isLastDown = isLastDown && bindModel.orderedData[i].myhigh < bindModel.orderedData[i].mylow
+                                if(body.config.matchReversal)
+                                {
+                                    isLastDown = isLastDown && bindModel.orderedData[i].myhigh > bindModel.orderedData[i].mylow; 
+                                }
+                                else
+                                {
+                                    isLastDown = isLastDown && bindModel.orderedData[i].myhigh < bindModel.orderedData[i].mylow;
+                                }
                             }
                         }
 
@@ -994,6 +1011,21 @@
                         <label for="timeToMatch" lass="control-label">How many minutes match ?</label>
                         <input type="text" name="timeToMatch" ng-model="body.config.timeToMatch" class="form-control" required>
                     </div>
+
+                    <div class="form-group">
+
+                            <div class="btn-group">
+                                <label class="btn btn-default">
+                                    <input type="checkbox" name="matchReversal" id="matchReversal" ng-model="body.config.matchReversal" >
+                                    Time to match reverse ?
+                                    
+                                </label>
+                            </div>
+                    </div>
+
+
+
+
 
                      <div class="form-group">
 
