@@ -259,7 +259,7 @@
                     //calculate it
 
 
-                    var startDate = dateService.substractMinuteFromDate(endDate, config.backMinutes());
+                    var startDate = dateService.substractMinuteFromDate(endDate, config.timeMinutes);
 
                     if (startDate < keydData.first.keyDate || startDate > keydData.last.keyDate)
                         startDate = keydData.first.keyDate;
@@ -475,6 +475,7 @@
                 };
 
                 service.startAnalysisProcess = function (keyData, startDate, endDate, config, item) {
+                    
                     var high = 0;
                     var equal = 0;
                     var low = 0;
@@ -489,6 +490,64 @@
                    
 
                    var volumeObj = service.calculateVolumes(keyData,startDate,endDate,config,item);
+
+                   var minuteCount = (endDate - startDate)/(1000*60);
+                   var current  = 0;
+                   var direction = false;
+                   var starthigh = keyData[startDate].high;
+                   var startlow = keyData[startDate].low;
+                   var endhigh =  keyData[endDate].high;
+                   var endlow = keyData[endDate].low;
+                  
+                   var allhigh = starthigh;
+                   var alllow = endlow;
+                   if(starthigh < endhigh)
+                   {
+                       direction = true;
+                       allhigh = endhigh;
+                       alllow = startlow;
+                   }
+                   
+                   var size =  allhigh - alllow ;
+                   
+
+
+                 var trendFound = true;
+                    current = 1;
+                    while(myStartDate<= endDate)
+                    {
+                       
+                        var maxDiffPercentage = 100 - config.alertPercentage;
+                        var maxDiff = (size * maxDiffPercentage)/100;
+                        var thisMinuteDiff = 0;
+                        var oneMinuteSize = size/minuteCount;
+                       
+                        
+                        if(direction)
+                        {
+                            var currentMinuteSize = (oneMinuteSize * current) + alllow;
+                            var maxDownSize = currentMinuteSize - maxDiff;
+                            if(keyData[myStartDate].low < maxDownSize)
+                            {
+                                trendFound = false;
+                            }
+                        }
+                        else
+                        {
+                            var currentMinuteSize = (oneMinuteSize *(minuteCount - (current-1))) + alllow;
+                            var maxUpSize = currentMinuteSize + maxDiff;
+                             if(keyData[myStartDate].high > maxUpSize)
+                            {
+                                trendFound = false;
+                            }
+                        }
+
+                        current = current+1;
+                        myStartDate = dateService.addMinuteToDate(myStartDate, 1);
+                    }
+                    
+
+                    myStartDate = startDate;
 
                    
 
@@ -562,12 +621,15 @@
                         bindModel.avgDown = avgDown;
 
                         bindModel.allData = myAllData;
+                        bindModel.foundTrend = trendFound;
+                        bindModel.trendDirection = direction;
                     }
                     else {
                         bindModel = {};
                         bindModel.error = 'Not enough data!';
                     }
 
+                    
                     return bindModel;
 
                 };
@@ -699,9 +761,9 @@
                         };
 
 
-
+                        
                         if (isLastUp
-                            && (bindModel.high >= body.config.alertPercentage && bindModel.high >= bindModel.low)) {
+                            && (bindModel.foundTrend && bindModel.trendDirection)) {
                             retObj.trade = 'high';
                             if(body.config.alertPercentage > 0)
                                 body.sendNotif('Trade up ' + retObj.symbol);
@@ -709,7 +771,7 @@
                             body.notifyArray.push(retObj);
                         }
                         else if (isLastDown
-                            && (bindModel.low >= body.config.alertPercentage && bindModel.low > bindModel.high)) {
+                            && (bindModel.foundTrend && (!bindModel.trendDirection))) {
                             retObj.trade = 'down';
                             if(body.config.alertPercentage > 0)
                                 body.sendNotif('Trade down ' + retObj.symbol);
@@ -956,6 +1018,10 @@
                         <label for="minutes" class="control-label">How many minutes to check last ?</label>
                         <select name="minutes" ng-model="body.config.minutesStr" ng-change="body.calculateEndDateOfSelection()" class="form-control">
                             <option value="">Select</option>
+                            <option value="01">01 minutes</option>
+                            <option value="02">02 minutes</option>
+                             <option value="03">03 minutes</option>
+                             <option value="04">04 minutes</option>
                             <option value="05">05 minutes</option>
                             <option value="13">13 minutes</option>
                             <option value="15">15 minutes</option>
