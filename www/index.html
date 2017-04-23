@@ -326,79 +326,48 @@
 
                 service.calculateVolumes = function (keyData,startDate,endDate,config,item)
                 {
+                    var chartObj = {
+                            data:[[]],
+                            series:['name']
+                            ,labels:[]
+                            ,dataset:[{ yAxisID: 'y-axis-1' }]
+                            ,options:{
+                                scales: {
+                                        yAxes: [
+                                                    {
+                                                    id: 'y-axis-1',
+                                                    type: 'linear',
+                                                    display: true,
+                                                    position: 'left'
+                                                    }
+                                                ]
+                                        }
+                                    }
+                                };
+
+                            var closeChartVar = angular.copy(chartObj);
+                            closeChartVar.series[0] = 'close';
+                             var volumesChartVar = angular.copy(chartObj);
+                            volumesChartVar.series[0] = 'volumes';
+                             var ovbChartVar = angular.copy(chartObj);
+                           ovbChartVar.series[0] = 'ovb';
+                           var enhanceOvbChartVar = angular.copy(chartObj);
+                           enhanceOvbChartVar.series[0] = 'enhance_ovb';
+
+
+                    
                     var ret = {
                         volumeArr:[]
                         ,avgVolume:0
                         ,ovbArr:[]
                         ,closesArr:[]
                         ,enhanceOvbArr:[]
-                        ,closesChart:{
-                            data:[[]],
-                            series:['close']
-                            ,labels:[]
-                            ,dataset:[{ yAxisID: 'y-axis-1' }]
-                            ,options:{
-    scales: {
-      yAxes: [
-        {
-          id: 'y-axis-1',
-          type: 'linear',
-          display: true,
-          position: 'left'
-        }]}
-                        }
-                    }
-                        ,volumeChart:{
-                            data:[[]],
-                            series:['volumes']
-                            ,labels:[]
-                            ,dataset:[{ yAxisID: 'y-axis-1' }]
-                            ,options:{
-    scales: {
-      yAxes: [
-        {
-          id: 'y-axis-1',
-          type: 'linear',
-          display: true,
-          position: 'left'
-        }]}
-                        }
-                    }
+                        ,closesChart:closeChartVar
+                        ,volumeChart:volumesChartVar
 
-,ovbChart:{
-                            data:[[]],
-                            labels:[],
-                            series:['ovb']
-                            ,dataset:[{ yAxisID: 'y-axis-1' }]
-                            ,options:{
-    scales: {
-      yAxes: [
-        {
-          id: 'y-axis-1',
-          type: 'linear',
-          display: true,
-          position: 'left'
-        }]}
-                        }
-                    }
+                        ,ovbChart:ovbChartVar
 
-
-                    ,enhanceOvbChart:{
-                            data:[[]],
-                            labels:[],
-                            series:['enhance_ovb']
-                            ,dataset:[{ yAxisID: 'y-axis-1' }]
-                            ,options:{
-    scales: {
-      yAxes: [
-        {
-          id: 'y-axis-1',
-          type: 'linear',
-          display: true,
-          position: 'left'
-        }]}
-                        }
-                    }
+                    ,enhanceOvbChart:enhanceOvbChartVar
 
                     };
 
