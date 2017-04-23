@@ -639,9 +639,19 @@
                     , timeToMatch: 0
                     , lastSymbol: ''
                     , alertPercentage:70
+                    , timeMinutes : 90
+                    , timeHours : 1.5
                 };
 
                 body.notifyArray = [];
+
+                body.getMinutesFromHours = function(){
+                    body.config.timeMinutes =  Math.ceil(body.config.timeHours * 60);
+                };
+
+                 body.getHoursFromMinutes = function(){
+                    body.config.timeHours = body.config.timeMinutes / 60;
+                };
 
                 body.setShowGraph = function()
                 {
@@ -966,7 +976,15 @@
             <div class="panel-body">
                 <form name="calculateForm" novalidate="">
                     <div class="form-group">
-                        <label for="minutes" class="control-label">How many minutes ?</label>
+                        <label for="timeMinutes" class="control-label">How many minutes to scan ?</label>
+                        <input class="form-control" type="number" id="timeMinutes" name="timeMinutes" ng-model="body.config.timeMinutes" ng-change="body.getHoursFromMinutes()"/>
+                    </div> 
+                    <div class="form-group">
+                        <label for="timeHours" class="control-label">How many hours to scan ?</label>
+                        <input class="form-control" type="number" id="timeHours" name="timeHours" ng-model="body.config.timeHours" ng-change="body.getMinutesFromHours()"/>
+                    </div> 
+                    <div class="form-group">
+                        <label for="minutes" class="control-label">How many minutes to check last ?</label>
                         <select name="minutes" ng-model="body.config.minutesStr" ng-change="body.calculateEndDateOfSelection()" class="form-control">
                             <option value="">Select</option>
                             <option value="05">05 minutes</option>
