@@ -526,21 +526,26 @@
                         if(direction)
                         {
                             var currentMinuteSize = (oneMinuteSize * current) + alllow;
-                            var maxDownSize = currentMinuteSize - maxDiff;
-                            if(keyData[myStartDate].low < maxDownSize)
-                            {
-                                trendFound = false;
-                            }
+                            
                         }
                         else
                         {
                             var currentMinuteSize = (oneMinuteSize *(minuteCount - (current-1))) + alllow;
+                            
+                        }
+
+
+                        var maxDownSize = currentMinuteSize - maxDiff;
                             var maxUpSize = currentMinuteSize + maxDiff;
-                             if(keyData[myStartDate].high > maxUpSize)
+                            if(keyData[myStartDate].low < maxDownSize)
                             {
                                 trendFound = false;
                             }
-                        }
+                            else if (keyData[myStartDate].high > maxUpSize)
+                            {
+                                trendFound = false;
+                            }
+
 
                         current = current+1;
                         myStartDate = dateService.addMinuteToDate(myStartDate, 1);
