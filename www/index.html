@@ -324,6 +324,71 @@
                 }
 
 
+                service.calculateAvgLine = function(keyData,startDate,endDate,config,item)
+                {
+                    var myStartDate = startDate;
+                    var retArr = [];
+
+                     var minuteCount = (endDate - startDate)/(1000*60);
+                   var current  = 0;
+                   var direction = false;
+                   var starthigh = keyData[startDate].high;
+                   var startlow = keyData[startDate].low;
+                   var endhigh =  keyData[endDate].high;
+                   var endlow = keyData[endDate].low;
+                  
+                   var allhigh = starthigh;
+                   var alllow = endlow;
+                   if(starthigh < endhigh)
+                   {
+                       direction = true;
+                       allhigh = endhigh;
+                       alllow = startlow;
+                   }
+                   
+                   var size =  allhigh - alllow ;
+                   
+
+
+                 var trendFound = true;
+                    current = 1;
+
+                    while(myStartDate<= endDate)
+                    {
+                       
+                        var maxDiffPercentage = 100 - config.alertPercentage;
+                        var maxDiff = (size * maxDiffPercentage)/100;
+                        var thisMinuteDiff = 0;
+                        var oneMinuteSize = size/minuteCount;
+                       
+                        
+                        if(direction)
+                        {
+                            var currentMinuteSize = (oneMinuteSize * current) + alllow;
+                            
+                        }
+                        else
+                        {
+                            var currentMinuteSize = (oneMinuteSize *(minuteCount - (current-1))) + alllow;
+                            
+                        }
+
+
+                        retArr.push(currentMinuteSize);
+
+
+                        current = current+1;
+                        myStartDate = dateService.addMinuteToDate(myStartDate, 1);
+                    }
+
+
+                    return retArr;
+                    
+
+
+
+                };
+
                 service.calculateVolumes = function (keyData,startDate,endDate,config,item)
                 {
                     var chartObj = {
@@ -354,6 +419,8 @@
                            var enhanceOvbChartVar = angular.copy(chartObj);
                            enhanceOvbChartVar.series[0] = 'enhance_ovb';
 
+                           var dayGraphVar = angular.copy(chartObj);
+                           dayGraphVar.series[0] = 'day_graph';
 
                     
                     var ret = {
@@ -362,13 +429,16 @@
                         ,ovbArr:[]
                         ,closesArr:[]
                         ,enhanceOvbArr:[]
+                        ,averageLineArr:[]
+                        ,dayGraphArr:[]
+                        ,dayAverageLine:[]
                         ,closesChart:closeChartVar
                         ,volumeChart:volumesChartVar
 
                         ,ovbChart:ovbChartVar
 
                     ,enhanceOvbChart:enhanceOvbChartVar
-
+                        ,dayGraph:dayGraphVar
                     };
 
                  try
@@ -445,12 +515,22 @@
                         count = count +1;
 
                         myDate = dateService.addMinuteToDate(myDate, 1);
+
+
+
+                        
+                        
+
                     }
 
                     ret.avgVolume = startVolume/count;
 
                     ret.volumeChart.data = [ret.volumeArr];
                     ret.ovbChart.data = [ret.ovbArr];
+
+                    ret.averageLineArr = service.calculateAvgLine(keyData,startDate,endDate,config,item);
+                    ret.dayAverageLine = service.calculateAvgLine(keyData,keyData.first.keyDate,endDate,config,item);
+
                     if(config.showTodayAverage)
                     {
                        
@@ -461,8 +541,33 @@
                     {
                         ret.closesChart.data=[ret.closesArr];
                     }
+
+                    //day graph
+                    
+                    var myDate = keyData.first.keyDate;
+                    while (myDate <= endDate) {
+                        
+                        ret.dayGraphArr.push(parseFloat(keyData[myDate].close));
+
+                        ret.dayGraph.labels.push(myDate.getMinutes().toString());
+                        myDate = dateService.addMinuteToDate(myDate, 1);
+
+                    }
+
+                    ret.dayGraph.data = [ret.dayGraphArr];
+
+
+                    //averageLine
+                    if(config.showAverageLine)
+                    {
+                        ret.closesChart.data.push(ret.averageLineArr);
+                        ret.dayGraph.data.push(ret.dayAverageLine);
+                    }
+
                     
                     ret.enhanceOvbChart.data = [ret.enhanceOvbArr];
+
+                    
 
                  }
                  catch(Ex)
@@ -1110,6 +1215,22 @@
 
                          <div class="btn-group">
                             <label class="btn btn-default">
+                                <input type="checkbox" name="showDayGraph" id="showDayGraph" ng-model="body.config.showDayGraph">
+
+                                show day graph ?
+                            </label>
+                        </div>
+
+                        <div class="btn-group">
+                            <label class="btn btn-default">
+                                <input type="checkbox" name="showAverageLine" id="showAverageLine" ng-model="body.config.showAverageLine">
+
+                                show average line ?
+                            </label>
+                        </div>
+
+                         <div class="btn-group">
+                            <label class="btn btn-default">
                                 <input type="checkbox" name="showTodayAverage" id="showTodayAverage" ng-model="body.config.showTodayAverage" ng-change="body.setShowGraph();">
 
                                 show average and today divergance ?
@@ -1185,8 +1306,16 @@
                             Avg Volume : {{item.volumeObj.avgVolume | number:2}}<br>
                             <div ng-if="body.config.showGraph">
                                  graph : 
-                            <canvas id="graphLine1" class="chart chart-line" chart-data="item.volumeObj.closesChart.data" chart-labels="item.volumeObj.closesChart.labels" chart-series="item.volumeObj.closesChart.series" chart-options="item.volumeObj.closesChart.options" chart-dataset-override="item.volumeObj.closesChart.dataset">
-</canvas>
+                                <canvas id="graphLine1" class="chart chart-line" chart-data="item.volumeObj.closesChart.data" chart-labels="item.volumeObj.closesChart.labels" chart-series="item.volumeObj.closesChart.series" chart-options="item.volumeObj.closesChart.options" chart-dataset-override="item.volumeObj.closesChart.dataset">
+                                </canvas>
+                            </div>
+
+                            <br>
+
+                             <div ng-if="body.config.showDayGraph">
+                                 all day : 
+                                <canvas id="dayGraphLine1" class="chart chart-line" chart-data="item.volumeObj.dayGraph.data" chart-labels="item.volumeObj.dayGraph.labels" chart-series="item.volumeObj.dayGraph.series" chart-options="item.volumeObj.dayGraph.options" chart-dataset-override="item.volumeObj.dayGraph.dataset">
+                                </canvas>
                             </div>
                            
 
@@ -1291,6 +1420,15 @@
                             <td style="width:100%">
                                  <canvas id="graphLine2" class="chart chart-line" chart-data="body.bindModel.volumeObj.closesChart.data" chart-labels="body.bindModel.volumeObj.closesChart.labels" chart-series="body.bindModel.volumeObj.closesChart.series" chart-options="body.bindModel.volumeObj.closesChart.options" chart-dataset-override="body.bindModel.volumeObj.closesChart.dataset">
 </canvas>
+                            </td>
+                        </tr>
+                        <tr ng-if="body.config.showDayGraph">
+                            <td>
+                                all day
+                            </td>
+                            <td style="width:100%">
+                                 <canvas id="dayGraphLine2" class="chart chart-line" chart-data="body.bindModel.volumeObj.dayGraph.data" chart-labels="body.bindModel.volumeObj.dayGraph.labels" chart-series="body.bindModel.volumeObj.dayGraph.series" chart-options="body.bindModel.volumeObj.dayGraph.options" chart-dataset-override="body.bindModel.volumeObj.dayGraph.dataset">
+                                </canvas>
                             </td>
                         </tr>
                         <tr ng-if="body.config.showVolume">
