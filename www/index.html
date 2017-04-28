@@ -873,7 +873,7 @@
 
                         
                         if (isLastUp
-                            && (bindModel.foundTrend && bindModel.trendDirection)) {
+                            && (bindModel.high >= body.config.alertPercentage && bindModel.high >= bindModel.low)) {
                             retObj.trade = 'high';
                             if(body.config.alertPercentage > 0)
                                 body.sendNotif('Trade up ' + retObj.symbol);
@@ -881,7 +881,7 @@
                             body.notifyArray.push(retObj);
                         }
                         else if (isLastDown
-                            && (bindModel.foundTrend && (!bindModel.trendDirection))) {
+                            && (bindModel.low >= body.config.alertPercentage && bindModel.low > bindModel.high)) {
                             retObj.trade = 'down';
                             if(body.config.alertPercentage > 0)
                                 body.sendNotif('Trade down ' + retObj.symbol);
